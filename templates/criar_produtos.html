@@ -87,8 +87,8 @@
             <span class="block text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">🔐 Indique e Ganhe</span>
             <p class="text-sm text-slate-700 mb-2">Mande este link para um amigo lojista para ganhar seu QR Code grátis.</p>
             <div class="flex items-center gap-2 bg-white py-2 px-3 rounded-lg border border-amber-100">
-                <span class="text-indigo-600 font-bold text-sm truncate flex-1 pr-3">{{ request.scheme }}://{{ request.get_host }}{% url 'criar_loja' %}/?ref={{ indicacao_uuid }}</span>
-                <i class="fas fa-copy text-amber-400 cursor-pointer" onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'criar_loja' %}/?ref={{ indicacao_uuid }}')"></i>
+                <span class="text-indigo-600 font-bold text-sm truncate flex-1 pr-3">{{ request.scheme }}://{{ request.get_host }}{% url 'criar_loja' %}?ref={{ indicacao_uuid }}</span>
+                <i class="fas fa-copy text-amber-400 cursor-pointer" onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'criar_loja' %}?ref={{ indicacao_uuid }}')"></i>
             </div>
         </div>
 
