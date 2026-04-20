@@ -4,6 +4,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.text import slugify
 from django.views.decorators.clickjacking import xframe_options_exempt
 from .models import Loja, Categoria, Produto
+import mercadopago
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # 1. A PÁGINA DE VENDAS (Landing Page)
 def landing_page(request):
@@ -77,16 +80,59 @@ def criar_produtos(request, loja_id):
 
     return render(request, 'criar_produtos.html', {'loja': loja, 'categorias': categorias})
 
-# 4. A BARREIRA DE PAGAMENTO (PIX)
+# Configure suas credenciais do Mercado Pago
+sdk = mercadopago.SDK("APP_USR-5402725203039388-020123-10a75c260cf12f6663994256fc156b5d-1365742803")
+
+# 4. A BARREIRA DE PAGAMENTO (AGORA COM PIX REAL)
 def paywall(request, loja_id):
     loja = get_object_or_404(Loja, id=loja_id)
-    if request.method == 'POST':
-        loja.ativo = True
-        loja.save()
-        # AGORA ELE VAI PARA A TELA DE SUCESSO!
+    
+    # Se ele já pagou e atualizar a página, manda direto pro Sucesso
+    if loja.ativo:
         return redirect('sucesso', loja_id=loja.id)
 
-    return render(request, 'paywall.html', {'loja': loja})
+    pix_data = None
+    
+    # Gera um código PIX novo toda vez que a página carrega
+    payment_data = {
+        "transaction_amount": 19.99,
+        "description": f"Ativação do Cardápio - {loja.nome}",
+        "payment_method_id": "pix",
+        "payer": {
+            "email": "cliente@cozinhadigital.com",
+            "first_name": loja.nome,
+        },
+        "external_reference": str(loja.id) # Carimba a transação com o ID da loja
+    }
+    
+    result = sdk.payment().create(payment_data)
+    payment = result["response"]
+    
+    if "point_of_interaction" in payment:
+        pix_data = {
+            "qr_code": payment["point_of_interaction"]["transaction_data"]["qr_code"],
+            "qr_code_base64": payment["point_of_interaction"]["transaction_data"]["qr_code_base64"],
+        }
+
+    return render(request, 'paywall.html', {'loja': loja, 'pix': pix_data})
+
+# ANTENA DO MERCADO PAGO (WEBHOOK AUTOMÁTICO)
+@csrf_exempt
+def webhook_mercado_pago(request):
+    if request.method == "POST":
+        data = request.GET
+        if "data.id" in data:
+            payment_id = data.get("data.id")
+            payment_info = sdk.payment().get(payment_id)["response"]
+            
+            if payment_info.get("status") == "approved":
+                loja_id = payment_info.get("external_reference")
+                loja = Loja.objects.filter(id=loja_id).first()
+                if loja and not loja.ativo:
+                    loja.ativo = True
+                    loja.save()
+                    
+    return JsonResponse({"status": "sucesso"})
     
 # 6. TELA DE SUCESSO E ENTREGA DAS CHAVES
 def sucesso(request, loja_id):

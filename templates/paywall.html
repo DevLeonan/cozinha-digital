@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8"><title>Liberar Cardápio</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
     
@@ -12,20 +13,32 @@
             <h2 class="text-4xl font-black text-gray-800 mb-2">Seu cardápio está pronto! 🚀</h2>
             <p class="text-gray-500 mb-8 text-lg">Olhe ao lado como ficou incrível. Para liberar o link oficial para seus clientes, faça o pagamento único.</p>
             
-            <div class="bg-slate-50 border-2 border-slate-100 p-6 rounded-2xl mb-8">
+            <div class="bg-slate-50 border-2 border-slate-100 p-6 rounded-2xl mb-6">
                 <span class="block text-slate-400 font-bold mb-1 uppercase text-sm">Acesso Vitalício</span>
                 <span class="text-6xl font-black text-green-500">R$ 19<span class="text-3xl">,99</span></span>
             </div>
 
-            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" class="w-40 mx-auto mb-4 border-4 border-gray-100 rounded-xl">
-            <p class="text-sm font-bold text-gray-500 mb-6">Escaneie o QR Code no app do seu banco</p>
+            {% if pix %}
+            <div class="border-4 border-emerald-100 rounded-3xl p-4 mb-6 bg-white shadow-sm">
+                <p class="text-sm font-bold text-slate-500 mb-3">Escaneie o QR Code no app do seu banco</p>
+                <img src="data:image/png;base64, {{ pix.qr_code_base64 }}" class="w-48 mx-auto mb-4 rounded-xl shadow-md border border-slate-100">
+                
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">PIX Copia e Cola:</p>
+                    <textarea readonly class="w-full text-xs text-slate-600 bg-transparent resize-none h-16 outline-none cursor-text" onclick="this.select();">{{ pix.qr_code }}</textarea>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-6 bg-rose-50 border border-rose-200 text-rose-500 font-bold rounded-xl mb-6">
+                <i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i>
+                Erro ao gerar PIX seguro. Atualize a página ou verifique a conexão.
+            </div>
+            {% endif %}
 
-            <form method="POST">
-                {% csrf_token %}
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-2xl text-xl transition shadow-lg">
-                    Já Fiz o Pagamento ✅
-                </button>
-            </form>
+            <button onclick="window.location.reload();" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-2xl text-xl transition shadow-lg flex items-center justify-center gap-3 active:scale-95">
+                <i class="fas fa-sync-alt"></i> Já paguei! Liberar Acesso
+            </button>
+            <p class="text-xs text-slate-400 mt-4">Assim que o pagamento for confirmado, clique no botão acima.</p>
         </div>
 
         <div class="hidden md:flex justify-center">
