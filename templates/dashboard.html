@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel - {{ loja.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #0f172a; color: white; overflow-x: hidden; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="relative pb-20">
+
+    <nav class="relative z-10 w-full max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shadow-md text-white" style="background-color: {{ loja.cor_principal }};">
+                {{ loja.nome|make_list|first|upper }}
+            </div>
+            <span class="font-black text-xl tracking-tight hidden md:block">{{ loja.nome }}</span>
+        </div>
+        <a href="{% url 'criar_produtos' loja.id %}" class="bg-indigo-600 text-white font-bold py-2 px-4 md:px-6 rounded-xl text-sm hover:bg-indigo-700 transition">Editar Cardápio</a>
+    </nav>
+
+    <main class="relative z-10 w-full max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="glass-panel p-6 rounded-3xl text-center flex flex-col items-center gap-2">
+            <div class="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-shopping-bag"></i></div>
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Total de Pedidos</h3>
+            <span class="text-5xl font-black text-white">{{ total_pedidos }}</span>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl text-center flex flex-col items-center gap-2 md:col-span-2 lg:col-span-1 border-t-2 border-emerald-500">
+            <div class="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center text-xl"><i class="fas fa-hand-holding-usd"></i></div>
+            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider">Faturamento</h3>
+            <span class="text-4xl font-black text-emerald-400">R$ {{ faturamento_total|stringformat:'f' }}</span>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl lg:col-span-1">
+            <div class="flex items-center gap-3 mb-4">
+                 <div class="w-8 h-8 bg-amber-500/20 text-amber-400 rounded-lg flex items-center justify-center"><i class="fas fa-fire"></i></div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Mais Vendidos</h3>
+            </div>
+            <div class="space-y-2">
+            {% for prod in produtos_ranking %}
+                <div class="flex items-center justify-between bg-slate-800/30 p-2 rounded-xl text-sm">
+                    <span class="font-bold text-slate-200 truncate flex-1">{{ prod.produto_nome }}</span>
+                    <span class="text-emerald-400 font-extrabold">{{ prod.total_vendas }} <i class="fas fa-tags text-xs"></i></span>
+                </div>
+            {% empty %}
+                <p class="text-slate-500 text-xs text-center py-2">Sem dados.</p>
+            {% endfor %}
+            </div>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl md:col-span-2 lg:col-span-3 overflow-hidden">
+             <div class="flex items-center gap-3 mb-4">
+                 <div class="w-8 h-8 bg-indigo-500/20 text-indigo-400 rounded-lg flex items-center justify-center"><i class="fas fa-history"></i></div>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400">Pedidos Recentes</h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="text-slate-500 uppercase text-xs">
+                        <tr>
+                            <th class="p-3">Data</th>
+                            <th class="p-3">Cliente</th>
+                            <th class="p-3">Pagamento</th>
+                            <th class="p-3 text-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for pedido in pedidos_recentes %}
+                        <tr class="border-t border-slate-800 hover:bg-slate-800/30">
+                            <td class="p-3 text-slate-400">{{ pedido.criado_em|date:'d/m H:i' }}</td>
+                            <td class="p-3 font-bold text-slate-200">{{ pedido.nome_cliente }}</td>
+                            <td class="p-3 text-emerald-400">{{ pedido.forma_pagamento }}</td>
+                            <td class="p-3 text-right font-extrabold text-emerald-500">R$ {{ pedido.total|stringformat:'f' }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4" class="p-6 text-center text-slate-500">Nenhum pedido.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

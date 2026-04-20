@@ -6,13 +6,13 @@ urlpatterns = [
     path('criar-loja/', views.criar_loja, name='criar_loja'),
     path('criar-produtos/<int:loja_id>/', views.criar_produtos, name='criar_produtos'),
     path('ativar/<int:loja_id>/', views.paywall, name='paywall'),
-    
-    # NOVAS ROTAS AQUI:
     path('sucesso/<int:loja_id>/', views.sucesso, name='sucesso'),
     path('login/', views.login_lojista, name='login'),
+    path('webhook/', views.webhook_mercado_pago, name='webhook'),
+    
+    path('pedido/<slug:slug>/salvar/', views.salvar_pedido_ajax, name='salvar_pedido_ajax'),
+    path('dashboard/<int:loja_id>/', views.dashboard_lojista, name='dashboard_lojista'),
+    path('indicacao/<int:loja_id>/gerar-qrcode/', views.gerar_qrcode_personalizado, name='gerar_qrcode_personalizado'),
     
     path('<slug:slug>/', views.cardapio_publico, name='cardapio_publico'),
-    path('ativar/<int:loja_id>/', views.paywall, name='paywall'),
-    path('sucesso/<int:loja_id>/', views.sucesso, name='sucesso'),
-    path('webhook/', views.webhook_mercado_pago, name='webhook'), # <-- ROTA NOVA
 ]
