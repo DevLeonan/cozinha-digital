@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"><title>Liberar Cardápio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    
+    <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        
+        <div class="bg-white p-10 rounded-3xl shadow-xl text-center">
+            <h2 class="text-4xl font-black text-gray-800 mb-2">Seu cardápio está pronto! 🚀</h2>
+            <p class="text-gray-500 mb-8 text-lg">Olhe ao lado como ficou incrível. Para liberar o link oficial para seus clientes, faça o pagamento único.</p>
+            
+            <div class="bg-slate-50 border-2 border-slate-100 p-6 rounded-2xl mb-8">
+                <span class="block text-slate-400 font-bold mb-1 uppercase text-sm">Acesso Vitalício</span>
+                <span class="text-6xl font-black text-green-500">R$ 19<span class="text-3xl">,99</span></span>
+            </div>
+
+            <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" class="w-40 mx-auto mb-4 border-4 border-gray-100 rounded-xl">
+            <p class="text-sm font-bold text-gray-500 mb-6">Escaneie o QR Code no app do seu banco</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-2xl text-xl transition shadow-lg">
+                    Já Fiz o Pagamento ✅
+                </button>
+            </form>
+        </div>
+
+        <div class="hidden md:flex justify-center">
+            <div class="relative w-[320px] h-[650px] bg-black rounded-[40px] border-[10px] border-black shadow-2xl overflow-hidden">
+                <div class="absolute top-0 inset-x-0 h-6 bg-black rounded-b-3xl w-40 mx-auto z-10"></div>
+                <iframe src="{% url 'cardapio_publico' loja.slug %}" class="w-full h-full bg-white scrollbar-hide"></iframe>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

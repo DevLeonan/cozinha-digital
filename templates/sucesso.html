@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"><title>Pagamento Confirmado!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-lg text-center border-t-8 border-emerald-500">
+        
+        <div class="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-check-circle text-6xl text-emerald-500"></i>
+        </div>
+        
+        <h2 class="text-3xl font-black text-slate-800 mb-2">Tudo Certo! 🎉</h2>
+        <p class="text-slate-500 mb-8">O pagamento foi confirmado e seu sistema já está online.</p>
+        
+        <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 text-left space-y-5">
+            <div>
+                <span class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">🔗 Link do seu Cardápio (Para enviar aos clientes)</span>
+                <a href="{% url 'cardapio_publico' loja.slug %}" target="_blank" class="text-indigo-600 font-bold break-all hover:underline text-lg">
+                    {{ request.scheme }}://{{ request.get_host }}/{% url 'cardapio_publico' loja.slug %}
+                </a>
+            </div>
+            
+            <hr class="border-slate-200">
+            
+            <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl">
+                <span class="block text-xs font-bold text-amber-600 uppercase tracking-wider mb-2">🔐 Suas Chaves de Acesso (Não perca!)</span>
+                <p class="text-sm text-slate-700 mb-2">Para adicionar ou alterar produtos no futuro, acesse o link de painel abaixo com sua senha.</p>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-slate-500 font-bold">Link do Painel:</span>
+                    <span class="text-indigo-600 font-bold text-sm">{{ request.scheme }}://{{ request.get_host }}/login/</span>
+                </div>
+                <div class="flex justify-between items-center bg-white py-2 px-3 rounded-lg border border-amber-100">
+                    <span class="text-slate-500 font-bold">Sua Senha:</span>
+                    <span class="font-mono text-2xl font-black text-slate-800 tracking-widest">{{ loja.senha_admin }}</span>
+                </div>
+            </div>
+        </div>
+
+        <a href="{% url 'cardapio_publico' loja.slug %}" class="block w-full bg-slate-900 hover:bg-black text-white font-bold py-4 rounded-xl mt-8 transition shadow-lg text-lg">
+            Acessar Meu Cardápio Agora
+        </a>
+    </div>
+</body>
+</html>

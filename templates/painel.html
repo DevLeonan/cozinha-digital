@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel da Loja - {{ loja.nome }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-salvar { background-color: #28a745; color: white; font-weight: bold; font-size: 1.2rem; padding: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-4 mb-5">
+    <h2 class="text-center mb-4">Bem-vindo, <b>{{ loja.nome }}</b>!</h2>
+
+    <div class="card p-4 mb-4">
+        <h4 class="mb-3">🍔 Adicionar Novo Produto</h4>
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <label class="form-label text-muted">Categoria do Produto</label>
+                <select name="categoria" class="form-select form-select-lg" required>
+                    {% for cat in categorias %}
+                        <option value="{{ cat.id }}">{{ cat.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted">Nome do Lanche/Produto</label>
+                <input type="text" name="nome" class="form-control form-control-lg" placeholder="Ex: X-Salada Duplo" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted">Preço (R$)</label>
+                <input type="number" step="0.01" name="preco" class="form-control form-control-lg" placeholder="Ex: 29.90" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label text-muted">Descrição (Opcional)</label>
+                <textarea name="descricao" class="form-control" rows="2" placeholder="O que vem nesse lanche?"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-salvar w-100">SALVAR PRODUTO AGORA</button>
+        </form>
+    </div>
+
+    <h4 class="mb-3">📋 Seus Produtos</h4>
+    <div class="list-group">
+        {% for produto in produtos %}
+            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold">{{ produto.nome }}</h6>
+                    <small class="text-muted">{{ produto.categoria.nome }}</small>
+                </div>
+                <span class="badge bg-primary rounded-pill" style="font-size: 1rem;">R$ {{ produto.preco }}</span>
+            </div>
+        {% empty %}
+            <p class="text-center text-muted mt-3">Você ainda não tem produtos cadastrados.</p>
+        {% endfor %}
+    </div>
+
+</div>
+
+</body>
+</html>

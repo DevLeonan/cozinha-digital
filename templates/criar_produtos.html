@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8"><title>Montar Cardápio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 h-screen overflow-hidden flex">
+
+    <div class="w-1/2 h-full overflow-y-auto p-8 border-r border-slate-200 bg-white">
+        
+        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-slate-100">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md" style="background-color: {{ loja.cor_principal }};">
+                {{ loja.nome|make_list|first|upper }}
+            </div>
+            <div>
+                <h2 class="text-2xl font-black text-slate-800">Montar Cardápio</h2>
+                <p class="text-slate-500 text-sm">Adicione suas categorias e produtos abaixo.</p>
+            </div>
+        </div>
+
+        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 mb-6">
+            <h3 class="font-bold text-slate-700 mb-3 text-sm uppercase tracking-wider"><i class="fas fa-layer-group text-indigo-500 mr-2"></i>1. Nova Categoria</h3>
+            <form method="POST" class="flex gap-2">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="nova_categoria">
+                <input type="text" name="nome_categoria" placeholder="Ex: Bebidas, Sobremesas, Combos..." required class="flex-1 px-4 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl transition">Criar</button>
+            </form>
+        </div>
+
+        {% if categorias %}
+        <div class="bg-white p-6 rounded-2xl shadow-[0_4px_20px_-5px_rgba(0,0,0,0.1)] border border-slate-100 mb-8">
+            <h3 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wider"><i class="fas fa-plus-circle text-emerald-500 mr-2"></i>2. Novo Item</h3>
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="acao" value="novo_produto">
+                
+                <div>
+                    <label class="text-xs font-bold text-slate-500">Categoria</label>
+                    <select name="categoria_id" class="w-full mt-1 px-4 py-2 border border-slate-300 rounded-xl outline-none bg-slate-50">
+                        {% for cat in categorias %}
+                            <option value="{{ cat.id }}">{{ cat.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="text-xs font-bold text-slate-500">Nome do Produto</label>
+                        <input type="text" name="nome" placeholder="Ex: X-Bacon Supremo" required class="w-full mt-1 px-4 py-2 border border-slate-300 rounded-xl outline-none bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500">Preço Normal (R$)</label>
+                        <input type="number" step="0.01" name="preco" placeholder="29.90" required class="w-full mt-1 px-4 py-2 border border-slate-300 rounded-xl outline-none bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-rose-500">Promoção (Opcional)</label>
+                        <input type="number" step="0.01" name="preco_promocional" placeholder="24.90" class="w-full mt-1 px-4 py-2 border border-rose-200 rounded-xl outline-none bg-rose-50 focus:ring-rose-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 mt-2 bg-amber-50 p-3 rounded-xl border border-amber-100">
+                    <input type="checkbox" name="mais_vendido" id="mais_vendido" class="w-5 h-5 text-amber-500 rounded focus:ring-amber-500">
+                    <label for="mais_vendido" class="font-bold text-amber-700 cursor-pointer flex items-center gap-2">
+                        <i class="fas fa-star"></i> Destacar como Mais Vendido
+                    </label>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-slate-500">Foto do Produto (Opcional)</label>
+                    <input type="file" name="foto" accept="image/*" class="w-full mt-1 p-2 border border-slate-300 rounded-xl bg-slate-50 text-sm">
+                </div>
+
+                <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-3 rounded-xl transition mt-4">Salvar Produto</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="p-6 bg-amber-50 text-amber-700 rounded-2xl border border-amber-200 text-center font-bold">
+            👉 Crie uma categoria primeiro para adicionar produtos!
+        </div>
+        {% endif %}
+
+        <a href="{% url 'paywall' loja.id %}" class="block w-full bg-emerald-500 hover:bg-emerald-600 text-white text-center font-black py-4 rounded-xl transition shadow-lg shadow-emerald-500/30 text-lg">
+            Finalizar e Ativar Link 🚀
+        </a>
+    </div>
+
+    <div class="w-1/2 h-full bg-slate-200 flex flex-col items-center justify-center p-8 relative">
+        <h3 class="absolute top-8 text-slate-400 font-bold tracking-widest uppercase text-sm"><i class="fas fa-mobile-alt mr-2"></i> Prévia em Tempo Real</h3>
+        
+        <div class="relative w-[340px] h-[700px] bg-black rounded-[45px] border-[12px] border-black shadow-2xl overflow-hidden mt-6">
+            <div class="absolute top-0 inset-x-0 h-6 bg-black rounded-b-3xl w-40 mx-auto z-10"></div>
+            <iframe src="{% url 'cardapio_publico' loja.slug %}" class="w-full h-full bg-white scrollbar-hide"></iframe>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cardápio - {{ loja.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Variáveis de cor dinâmicas baseadas na escolha do cliente */
+        :root {
+            --brand-color: {{ loja.cor_principal }};
+        }
+        .bg-brand { background-color: var(--brand-color); }
+        .text-brand { color: var(--brand-color); }
+        .border-brand { border-color: var(--brand-color); }
+        
+        /* Animações de entrada Premium */
+        @keyframes slideUpFade {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-item {
+            animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+        
+        /* Efeito visual no botão de categoria */
+        .category-line {
+            background: linear-gradient(90deg, var(--brand-color) 0%, transparent 100%);
+        }
+
+        /* Efeito de Vidro (Glassmorphism) pro carrinho */
+        .glass-cart {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body class="pb-32 relative">
+
+    {% if is_preview %}
+    <div class="bg-rose-500 text-white text-center py-2 px-4 text-xs font-bold uppercase tracking-wider fixed top-0 w-full z-50 shadow-md flex items-center justify-center gap-2">
+        <i class="fas fa-eye"></i> Modo de Visualização
+    </div>
+    <div class="mt-8"></div>
+    {% endif %}
+
+    <div class="bg-brand relative pt-10 pb-16 px-4 shadow-lg" style="border-bottom-left-radius: 40px; border-bottom-right-radius: 40px;">
+        <div class="max-w-md mx-auto text-center relative z-10">
+            <div class="relative inline-block">
+                {% if loja.logo %}
+                    <img src="{{ loja.logo.url }}" class="w-28 h-28 mx-auto rounded-full object-cover shadow-2xl border-4 border-white mb-3 bg-white">
+                {% else %}
+                    <div class="w-28 h-28 mx-auto rounded-full bg-white text-brand flex items-center justify-center text-4xl font-black shadow-2xl border-4 border-white mb-3">
+                        {{ loja.nome|make_list|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
+            <h1 class="text-3xl font-extrabold text-white tracking-tight">{{ loja.nome }}</h1>
+            <p class="text-sm text-white/80 font-medium mt-1 flex items-center justify-center gap-2">
+                <i class="fab fa-whatsapp"></i> Pedidos Oficiais
+            </p>
+        </div>
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at center, white 1px, transparent 1px); background-size: 20px 20px;"></div>
+    </div>
+
+    <div class="max-w-md mx-auto px-4 -mt-6 relative z-20">
+        {% for categoria in categorias %}
+            <div class="mb-10">
+                <div class="flex items-center gap-3 mb-5 mt-8">
+                    <h2 class="text-xl font-bold text-slate-800">{{ categoria.nome }}</h2>
+                    <div class="h-0.5 flex-1 category-line rounded-full opacity-50"></div>
+                </div>
+                
+                <div class="space-y-4">
+                {% for produto in produtos %}
+                    {% if produto.categoria == categoria %}
+                    <div class="bg-white p-4 rounded-3xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-slate-100 flex justify-between gap-4 animate-item transition-transform duration-300 relative overflow-hidden" style="animation-delay: {{ forloop.counter0|add:1 }}00ms;">
+                        
+                        {% if produto.mais_vendido %}
+                        <div class="absolute -left-10 top-3 bg-amber-500 text-white text-[10px] font-black uppercase py-1 px-10 transform -rotate-45 shadow-md flex items-center justify-center gap-1 z-10 w-32">
+                            <i class="fas fa-star"></i> Top
+                        </div>
+                        {% endif %}
+
+                        <div class="flex-1 flex flex-col justify-between pl-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base leading-tight mb-1">{{ produto.nome }}</h3>
+                                {% if produto.descricao %}
+                                    <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">{{ produto.descricao }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mt-3 flex items-center justify-between">
+                                <div>
+                                    {% if produto.preco_promocional %}
+                                        <span class="text-xs text-slate-400 line-through block">R$ {{ produto.preco }}</span>
+                                        <span class="text-lg font-extrabold text-rose-500">R$ {{ produto.preco_promocional }}</span>
+                                    {% else %}
+                                        <span class="text-lg font-extrabold text-slate-800">R$ {{ produto.preco }}</span>
+                                    {% endif %}
+                                </div>
+
+                                {% if produto.preco_promocional %}
+                                    <button onclick="adicionarAoCarrinho('{{ produto.nome }}', {{ produto.preco_promocional|stringformat:'f' }})" class="bg-brand text-white font-bold py-1.5 px-5 rounded-full text-sm transition shadow-md hover:opacity-90 active:scale-95 z-20 relative">Adicionar</button>
+                                {% else %}
+                                    <button onclick="adicionarAoCarrinho('{{ produto.nome }}', {{ produto.preco|stringformat:'f' }})" class="bg-brand text-white font-bold py-1.5 px-5 rounded-full text-sm transition shadow-md hover:opacity-90 active:scale-95 z-20 relative">Adicionar</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        {% if produto.foto %}
+                        <div class="relative z-0">
+                            <img src="{{ produto.foto.url }}" class="w-28 h-28 object-cover rounded-2xl shadow-sm">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="carrinho-float" class="fixed bottom-0 left-0 right-0 glass-cart p-4 transform translate-y-full opacity-0 transition-all duration-500 z-50">
+        <div class="max-w-md mx-auto">
+            <button onclick="finalizarPedido()" class="w-full bg-brand text-white font-bold py-4 px-6 rounded-2xl shadow-xl flex justify-between items-center transform transition active:scale-95">
+                <div class="flex items-center gap-3">
+                    <div class="bg-white/20 text-white w-8 h-8 flex items-center justify-center rounded-full text-sm font-black" id="qtd-itens">0</div>
+                    <span class="text-lg">Ver Sacola</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="total-carrinho" class="text-xl font-black tracking-tight">R$ 0,00</span>
+                    <i class="fas fa-chevron-right text-sm opacity-70"></i>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <a href="https://wa.me/55{{ loja.telefone_whatsapp }}?text=Olá! Tenho uma dúvida sobre o cardápio." target="_blank" class="fixed bottom-24 right-4 bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[0_4px_15px_rgba(37,211,102,0.4)] z-40 transition transform hover:scale-110">
+        <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-40 animate-ping"></span>
+        <i class="fab fa-whatsapp text-3xl relative z-10"></i>
+    </a>
+
+    <script>
+        let carrinho = [];
+        let total = 0;
+        let telefone = "{{ loja.telefone_whatsapp }}"; 
+        let isPreview = "{{ is_preview }}" === "True";
+        let urlPagamento = "{% url 'paywall' loja.id %}";
+
+        function adicionarAoCarrinho(nome, preco) {
+            carrinho.push({nome: nome, preco: parseFloat(preco)});
+            total += parseFloat(preco);
+            
+            let btnFloat = document.getElementById('carrinho-float');
+            btnFloat.classList.remove('translate-y-full', 'opacity-0');
+            
+            // Pequena animação de "pulo" no botão ao adicionar
+            let btnInner = btnFloat.querySelector('button');
+            btnInner.classList.add('scale-95');
+            setTimeout(() => btnInner.classList.remove('scale-95'), 150);
+            
+            document.getElementById('qtd-itens').innerText = carrinho.length;
+            document.getElementById('total-carrinho').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function finalizarPedido() {
+            if (isPreview) {
+                // Efeito visual antes de redirecionar para a cobrança
+                document.body.style.opacity = '0.5';
+                window.parent.location.href = urlPagamento; // window.parent garante que saia do iframe
+                return;
+            }
+
+            let texto = "Olá! Gostaria de fazer o seguinte pedido:%0A%0A";
+            carrinho.forEach(item => {
+                texto += `🍔 1x ${item.nome} - R$ ${item.preco.toFixed(2).replace('.', ',')}%0A`;
+            });
+            texto += `%0A*Total: R$ ${total.toFixed(2).replace('.', ',')}*`;
+            texto += "%0A%0AQual a taxa de entrega e chave PIX?";
+            
+            window.open(`https://wa.me/55${telefone}?text=${texto}`, '_blank');
+        }
+    </script>
+</body>
+</html>
