@@ -12,7 +12,7 @@ from django.db.models import Count, Sum
 from .models import Loja, Categoria, Produto, Pedido, ItemPedido, Indicacao
 
 # Configure suas credenciais do Mercado Pago
-sdk = mercadopago.SDK("SEU_ACCESS_TOKEN_AQUI")
+sdk = mercadopago.SDK("APP_USR-5402725203039388-020123-10a75c260cf12f6663994256fc156b5d-1365742803")
 
 def landing_page(request):
     return render(request, 'landing.html')
