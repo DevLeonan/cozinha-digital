@@ -199,6 +199,23 @@ def dashboard_lojista(request, loja_id):
         'faturamento_pix': faturamento_pix, 'produtos_ranking': produtos_ranking, 'pedidos_recentes': pedidos_recentes
     })
 
+def checar_status_pagamento(request, slug):
+    try:
+        loja = Loja.objects.get(slug=slug)
+        
+        # Se a loja já está ativa (pagou)
+        if loja.ativo == True: 
+            return JsonResponse({
+                'aprovado': True,
+                # A MÁGICA ACONTECE AQUI: Usando o nome exato e o ID da loja!
+                'url_redirecionamento': reverse('sucesso', args=[loja.id]) 
+            })
+        else:
+            return JsonResponse({'aprovado': False})
+            
+    except Loja.DoesNotExist:
+        return JsonResponse({'aprovado': False, 'erro': 'Loja não encontrada'})
+
 @xframe_options_exempt
 def gerar_qrcode_personalizado(request, loja_id):
     loja = get_object_or_404(Loja, id=loja_id)
