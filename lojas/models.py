@@ -19,7 +19,8 @@ class Loja(models.Model):
 
     def __str__(self):
         return self.nome
-
+        
+        
 class Categoria(models.Model):
     loja = models.ForeignKey(Loja, on_delete=models.CASCADE, related_name='categorias')
     nome = models.CharField(max_length=50)
@@ -67,3 +68,4 @@ class Indicacao(models.Model):
 
     def __str__(self):
         return f"Indicação de {self.lojista_indicador.nome}"
+        

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8"><title>Liberar Cardápio</title>
+    <meta charset="UTF-8">
+    <title>Liberar Cardápio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -23,9 +24,21 @@
                 <p class="text-sm font-bold text-slate-500 mb-3">Escaneie o QR Code no app do seu banco</p>
                 <img src="data:image/png;base64, {{ pix.qr_code_base64 }}" class="w-48 mx-auto mb-4 rounded-xl shadow-md border border-slate-100">
                 
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left">
-                    <p class="text-xs font-bold text-slate-400 uppercase mb-1">PIX Copia e Cola:</p>
-                    <textarea readonly class="w-full text-xs text-slate-600 bg-transparent resize-none h-16 outline-none cursor-text" onclick="this.select();">{{ pix.qr_code }}</textarea>
+                <div class="mt-4">
+                    <p class="text-xs font-bold text-slate-400 uppercase mb-2">Ou use o PIX Copia e Cola:</p>
+                    
+                    <button 
+                        id="btnCopiaPix" 
+                        data-pix="{{ pix.qr_code }}"
+                        onclick="copiarPixCompleto()" 
+                        class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 px-4 rounded-xl text-lg transition shadow-md flex items-center justify-center gap-2 active:scale-95">
+                        <i id="iconeCopia" class="fas fa-copy"></i>
+                        <span id="textoBotao">COPIAR CÓDIGO PIX</span>
+                    </button>
+
+                    <p id="msgCopiado" class="text-emerald-600 font-bold text-sm mt-3 hidden bg-emerald-50 p-2 rounded-lg">
+                        <i class="fas fa-check-circle"></i> Copiado! Cole no seu banco.
+                    </p>
                 </div>
             </div>
             {% else %}
@@ -35,7 +48,7 @@
             </div>
             {% endif %}
 
-            <button onclick="window.location.reload();" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-2xl text-xl transition shadow-lg flex items-center justify-center gap-3 active:scale-95">
+            <button onclick="window.location.reload();" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-2xl text-xl transition shadow-lg flex items-center justify-center gap-3 active:scale-95 mt-4">
                 <i class="fas fa-sync-alt"></i> Já paguei! Liberar Acesso
             </button>
             <p class="text-xs text-slate-400 mt-4">Assim que o pagamento for confirmado, clique no botão acima.</p>
@@ -50,5 +63,42 @@
 
     </div>
 
+    <script>
+    function copiarPixCompleto() {
+        const btn = document.getElementById('btnCopiaPix');
+        const textoBotao = document.getElementById('textoBotao');
+        const msg = document.getElementById('msgCopiado');
+        const icone = document.getElementById('iconeCopia');
+        
+        // Puxa o código gigante e completo direto do atributo "data-pix"
+        const codigoPix = btn.getAttribute('data-pix');
+
+        // Manda o texto inteiro para a área de transferência
+        navigator.clipboard.writeText(codigoPix).then(() => {
+            // Efeitos visuais para o cliente saber que funcionou
+            btn.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
+            btn.classList.add('bg-green-700');
+            textoBotao.innerHTML = 'COPIADO!';
+            icone.classList.remove('fa-copy');
+            icone.classList.add('fa-check');
+            
+            msg.classList.remove('hidden');
+
+            // Volta ao normal depois de 4 segundos
+            setTimeout(() => {
+                btn.classList.remove('bg-green-700');
+                btn.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+                textoBotao.innerHTML = 'COPIAR CÓDIGO PIX';
+                icone.classList.remove('fa-check');
+                icone.classList.add('fa-copy');
+                msg.classList.add('hidden');
+            }, 4000);
+            
+        }).catch(err => {
+            // Plano B caso o celular bloqueie o clique
+            alert('Não foi possível copiar automaticamente. O código é: \n\n' + codigoPix);
+        });
+    }
+    </script>
 </body>
 </html>
