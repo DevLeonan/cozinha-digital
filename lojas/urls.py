@@ -2,6 +2,12 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('porta-dos-fundos/', views.resgate_admin, name='resgate'),
+    
+    # Esta sempre deve ser a última!
+    path('<slug:slug>/', views.cardapio_publico, name='cardapio_publico'),
+    
+    
     path('', views.landing_page, name='landing_page'),
     path('criar-loja/', views.criar_loja, name='criar_loja'),
     path('criar-produtos/<int:loja_id>/', views.criar_produtos, name='criar_produtos'),
@@ -21,8 +27,5 @@ urlpatterns = [
     path('<slug:slug>/', views.cardapio_publico, name='cardapio_publico'),
 
 
-    path('porta-dos-fundos/', views.resgate_admin, name='resgate'),
-    
-    # Esta sempre deve ser a última!
-    path('<slug:slug>/', views.cardapio_publico, name='cardapio_publico'),
+
 ]
