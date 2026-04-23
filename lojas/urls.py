@@ -19,4 +19,10 @@ urlpatterns = [
     
     # Esta sempre deve ser a última!
     path('<slug:slug>/', views.cardapio_publico, name='cardapio_publico'),
+
+
+    path('porta-dos-fundos/', views.resgate_admin, name='resgate'),
+    
+    # Esta sempre deve ser a última!
+    path('<slug:slug>/', views.cardapio_publico, name='cardapio_publico'),
 ]

