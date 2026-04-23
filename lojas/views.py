@@ -138,27 +138,45 @@ def paywall(request, loja_id):
 
     return render(request, 'paywall.html', {'loja': loja, 'pix': pix_data})
 
-@csrf_exempt
+@csrf_exempt # Adicione isso para o Django não bloquear o Mercado Pago
 def webhook_mercado_pago(request):
     if request.method == "POST":
-        data = request.GET
-        if "data.id" in data:
-            payment_id = data.get("data.id")
+        try:
+            # 1. Tenta pegar os dados do corpo (JSON)
+            data = json.loads(request.body)
+        except:
+            # 2. Se falhar, tenta pegar da URL (backup para notificações antigas)
+            data = request.GET
+
+        # O Mercado Pago envia "data.id" ou "resource" dependendo da versão
+        payment_id = None
+        if "data" in data and "id" in data["data"]:
+            payment_id = data["data"]["id"]
+        elif "resource" in data:
+            # Pega o ID se vier no formato de link (ex: /v1/payments/123)
+            payment_id = data["resource"].split('/')[-1]
+
+        if payment_id:
+            # Busca a info do pagamento no Mercado Pago
             payment_info = sdk.payment().get(payment_id).get("response", {})
             
             if payment_info.get("status") == "approved":
                 loja_id = payment_info.get("external_reference")
                 loja = Loja.objects.filter(id=loja_id).first()
+                
                 if loja and not loja.ativo:
                     loja.ativo = True
                     loja.save()
                     
+                    # Lógica de indicação
                     indicacao_paga = Indicacao.objects.filter(loja_indicada=loja, status='pendente').first()
                     if indicacao_paga:
                         indicacao_paga.status = 'pago'
                         indicacao_paga.save()
                         
-    return JsonResponse({"status": "sucesso"})
+        return JsonResponse({"status": "ok"}, status=200)
+        
+    return JsonResponse({"status": "metodo_nao_permitido"}, status=405)
 
 def sucesso(request, loja_id):
     loja = get_object_or_404(Loja, id=loja_id)
