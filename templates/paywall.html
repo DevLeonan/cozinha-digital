@@ -99,32 +99,29 @@
             alert('Não foi possível copiar automaticamente. O código é: \n\n' + codigoPix);
         });
     }
-	// RADAR DE PAGAMENTO: Checa a cada 4 segundos se o PIX foi aprovado
-    function iniciarRadarPagamento() {
-        // Substitua '{{ loja.slug }}' pela variável que identifica essa loja/pedido
-        const urlChecagem = "/api/checar-pagamento/{{ loja.slug }}/"; 
-        
-        const radar = setInterval(() => {
-            fetch(urlChecagem)
-            .then(resposta => resposta.json())
-            .then(dados => {
-                if (dados.aprovado === true) {
-                    clearInterval(radar); // Para o radar
-                    
-                    // Efeito visual no botão pra mostrar que deu certo
-                    const btn = document.querySelector('button[onclick="window.location.reload();"]');
-                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Pagamento Aprovado! Redirecionando...';
-                    btn.classList.replace('bg-blue-600', 'bg-green-600');
-                    
-                    // Manda o cliente para a tela do painel ou links após 2 segundos
-                    setTimeout(() => {
-                        window.location.href = dados.url_redirecionamento;
-                    }, 2000);
-                }
-            })
-            .catch(erro => console.log("Checando pagamento..."));
-        }, 4000); // 4000 milissegundos = 4 segundos
-    }
+	function iniciarRadarPagamento() {
+    // Usamos o slug para perguntar, mas recebemos o ID para redirecionar
+    const urlChecagem = "/api/checar-pagamento/{{ loja.slug }}/"; 
+    
+    const radar = setInterval(() => {
+        fetch(urlChecagem)
+        .then(resposta => resposta.json())
+        .then(dados => {
+            if (dados.aprovado === true) {
+                clearInterval(radar);
+                
+                const btn = document.querySelector('button[onclick="window.location.reload();"]');
+                btn.innerHTML = '<i class="fas fa-check-circle"></i> Pagamento Aprovado! Redirecionando...';
+                btn.classList.replace('bg-blue-600', 'bg-green-600');
+                
+                // IMPORTANTE: Sua rota 'sucesso' no urls.py pede o ID numérico.
+                // Vamos garantir que o link seja: /sucesso/ID_DA_LOJA/
+                window.location.href = `/sucesso/${dados.loja_id}/`;
+            }
+        })
+        .catch(erro => console.log("Aguardando confirmação..."));
+    }, 4000);
+}
 
     // Inicia o radar assim que a página carregar
     window.onload = iniciarRadarPagamento;
