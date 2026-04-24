@@ -124,44 +124,46 @@ def paywall(request, loja_id):
 
     return render(request, 'paywall.html', {'loja': loja, 'pix': pix_data})
 
-@csrf_exempt # Adicione isso para o Django não bloquear o Mercado Pago
+@csrf_exempt
 def webhook_mercado_pago(request):
     if request.method == "POST":
         try:
-            # 1. Tenta pegar os dados do corpo (JSON)
+            # O Mercado Pago envia os dados no corpo (body) da requisição
             data = json.loads(request.body)
-        except:
-            # 2. Se falhar, tenta pegar da URL (backup para notificações antigas)
-            data = request.GET
-
-        # O Mercado Pago envia "data.id" ou "resource" dependendo da versão
-        payment_id = None
-        if "data" in data and "id" in data["data"]:
-            payment_id = data["data"]["id"]
-        elif "resource" in data:
-            # Pega o ID se vier no formato de link (ex: /v1/payments/123)
-            payment_id = data["resource"].split('/')[-1]
-
-        if payment_id:
-            # Busca a info do pagamento no Mercado Pago
-            payment_info = sdk.payment().get(payment_id).get("response", {})
+            print(f"--- WEBHOOK RECEBIDO: {data} ---") # Isso vai aparecer nos Logs do Railway
             
-            if payment_info.get("status") == "approved":
-                loja_id = payment_info.get("external_reference")
-                loja = Loja.objects.filter(id=loja_id).first()
+            # Nas notificações novas, o ID do pagamento vem aqui:
+            payment_id = None
+            if "data" in data and "id" in data["data"]:
+                payment_id = data["data"]["id"]
+            elif "resource" in data: # Caso venha no formato antigo/tópico
+                payment_id = data["resource"].split('/')[-1]
+
+            if payment_id:
+                # Busca os detalhes do pagamento no Mercado Pago
+                payment_info = sdk.payment().get(payment_id).get("response", {})
                 
-                if loja and not loja.ativo:
-                    loja.ativo = True
-                    loja.save()
+                if payment_info.get("status") == "approved":
+                    # Pega o ID da loja que você enviou no 'external_reference' lá no Paywall
+                    loja_id = payment_info.get("external_reference")
+                    loja = Loja.objects.filter(id=loja_id).first()
                     
-                    # Lógica de indicação
-                    indicacao_paga = Indicacao.objects.filter(loja_indicada=loja, status='pendente').first()
-                    if indicacao_paga:
-                        indicacao_paga.status = 'pago'
-                        indicacao_paga.save()
+                    if loja and not loja.ativo:
+                        loja.ativo = True
+                        loja.save()
+                        print(f"LOJA {loja.nome} ATIVADA COM SUCESSO!")
                         
-        return JsonResponse({"status": "ok"}, status=200)
-        
+                        # Lógica de indicação (opcional)
+                        indicacao = Indicacao.objects.filter(loja_indicated=loja, status='pendente').first()
+                        if indicacao:
+                            indicacao.status = 'pago'
+                            indicacao.save()
+
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as e:
+            print(f"ERRO NO WEBHOOK: {e}")
+            return JsonResponse({"error": str(e)}, status=400)
+
     return JsonResponse({"status": "metodo_nao_permitido"}, status=405)
 
 def sucesso(request, loja_id):
